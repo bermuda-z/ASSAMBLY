@@ -3,33 +3,33 @@
 	.code
 	org 0100h
 main:
-	;set display textmode 
+	; set display textmode 
 	mov ah ,0h
 	mov al ,3h
 	int 10h
 	
-	;set start position 
-	mov dh , 0h ;row(y) (0 - 24)
-	mov dl , 0h ;column(x) (0 - 79)
+	; set start position 
+	mov dh , 0h ;row(y) is 0 (0 - 24)
+	mov dl , 0h ;column(x) is 0 (0 - 79)
 	mov bh , 0h
 
 printOT:
-	;move cursor
+	; move cursor
 	mov ah, 2h
 	int 10h
 	
-	;  push current cursor position to stack
+	; push current cursor position to stack
 	push dx
 	
-	;delay 1000 ms
+	; delay 1000 ms
 	mov ah,86h
 	mov cx,0000h
 	mov dx,2710h
 	int 15h
-	;  pop current cursor position to stack
+	; pop current cursor position to stack
 	pop dx
 	
-	;printO
+	; printO
 	mov ah,9h		; set to write character mode
 	mov cx,1		; print 1 character
 	mov bl,2h		; set color of character
@@ -46,7 +46,7 @@ checkyT:	; odd or even?
 oddT:		; row(y) is odd
 	dec dl			; decrease one column(x)
 	cmp dl,0h		; compare column(x) is less than 0
-	js nextevenT		; jump to newlineeven if column(x) less than 0
+	js nextevenT		; jump to newlineeven if column(x) is less than 0
 	jmp printOT		; jump to printing 'o'
 
 
@@ -62,12 +62,12 @@ nextevenT:	; newline is even
 	jmp printOT		; jump to printing 'o'
 
 nextoddT:	; newline is odd
-	cmp dh,18h		; compare row(y)	is greater or equal 24	
+	cmp dh,18h		; compare row(y) is greater or equal 24	
 	jge clearT		; jump to clearscreen if row(y)	is greater or equal 24	
 	inc dh			; increase one row(y)
 	dec dl			; decrease one column(x)
 	jmp printOT		; jump to printing 'o'
-clearT:		;clearscreen
+clearT:		; clearscreen
 	mov ah,6h
 	mov al,0h		; clear whole screen
 	mov bh,7h
@@ -78,64 +78,69 @@ clearT:		;clearscreen
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DtoT:
-	mov dh , 18h ;y
-	mov dl , 4Fh ;x
+DtoT:	
+	; set start position
+	mov dh , 18h ;row(y) is 24 (0 - 24)
+	mov dl , 4Fh ;column(x) is 79 (0 - 79)
 	mov bh , 0h
 
 printOD:
+	; move cursor
 	mov ah, 2h
 	int 10h
 	
+	; push current cursor position to stack
 	push dx
 	
+	; delay 1000 ms
 	mov ah,86h
 	mov cx,0000h
 	mov dx,2710h
 	int 15h
 
+	; pop current cursor position to stack
 	pop dx
 	
 	;printO
-	mov ah,9h
-	mov cx,1
-	mov bl,3h
-	mov al,6Fh
+	mov ah,9h		; set to write character mode
+	mov cx,1		; print 1 character
+	mov bl,3h		; set color of character
+	mov al,6Fh		; set character 'o'
 	int 10h
 	jmp checkyD
 
-checkyD:
+checkyD:	; odd or even?
 	test dh,1h    
-	jz evenD		;jump if even
+	jz evenD		; jump if row(y) is even
 
-oddD:	
-	inc dl		
-	cmp dl,50h
-	je nextevenD
-	jmp printOD
+oddD:		; row(y) is odd	
+	inc dl			; increase one column(x)
+	cmp dl,50h		; compare column(x) is equal 80
+	je nextevenD		; jump to newlineeven if column(x) is equal 80
+	jmp printOD		; jump to printing 'o'
 
 
-evenD:	
-	dec dl		
-	cmp dl,0h
-	js nextoddD
-	jmp printOD
+evenD:		; row(y) is even
+	dec dl			; decrease one column(x)
+	cmp dl,0h		; compare column(x) is less than 0 
+	js nextoddD		; jump to newlineodd if column(x) less than 0
+	jmp printOD		; jump to printing 'o'
 
-nextevenD:	
-	dec dl
-	dec dh
-	jmp printOD
+nextevenD:	; newline is even	
+	dec dl			; decrease one column(x)
+	dec dh			; decrease one row(y)
+	jmp printOD		; jump to printing 'o'
 
-nextoddD:
-	cmp dh,0h
-	jle clearD
-	inc dl
-	dec dh
-	jmp printOD	
+nextoddD:	; newline is odd
+	cmp dh,0h		; compare row(y) is less than or equal 0
+	jle clearD		; jump to clearscreen if row(y)	is less than or equal 0
+	inc dl			; increase one column(x)
+	dec dh			; decrease one row(y)
+	jmp printOD		; jump to printing 'o'
 
-clearD:	
-	mov ah,6h
-	mov al,0h
+clearD:		; clearscreen
+	mov ah,6h		
+	mov al,0h		; clear whole screen
 	mov bh,7h
 	mov cx,0h
 	mov dx,184fh
