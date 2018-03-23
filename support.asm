@@ -15,13 +15,15 @@ main:
 	mov dl , 28h ;x
 	mov bh , 0h
 
-  mov shootpos , dh                ;shoot
   mov posx , dl               ;rocket
   mov posy , dh               ;rocket
 
 printrocket:
+
+  mov shootpos , 17h
   mov dh , posy
   mov dl , posx
+
 	;cursor
 	mov ah, 2h
 	int 10h
@@ -88,27 +90,35 @@ printright:
 	jmp printrocket
 
 shootbullet:
-	cmp shootpos,0h
-	je printrocket
-	dec shootpos
-
+  cmp shootpos , 0h
+  jl printrocket
+  ;cursor delay
   mov dh,shootpos
-	;cursor
-	mov ah, 2h
-	int 10h
-	push dx
-	mov ah,86h
-	mov cx,0000h
-	mov dx,2710h
-	int 15h
-	pop dx
+  mov ah, 2h
+  int 10h
 
-	;printbullet
-	mov ah,9h
-	mov cx,1
-	mov bl,0eh
+  ;printbullet
+  mov ah,9h
+  mov cx,1
+  mov bl,0eh
+  mov al,23
+  int 10h
+
+  push dx
+  mov ah,86h
+  mov cx,0000h
+  mov dx,2710h
+  int 15h
+  pop dx
+
+  ;clearbullet
+  mov ah,9h
+  mov cx,1
+	mov bl,0h
 	mov al,23
 	int 10h
+
+  dec shootpos
 
 	jmp shootbullet
 
