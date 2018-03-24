@@ -24,56 +24,38 @@ main:
 	mov bary , 18h               ;bar
 
 printbar:
-	mov dl ,barx
+	mov dl ,0h
 	mov dh ,bary
-
-  ;cursor
+    ;cursor
 	mov ah, 2h
 	int 10h
-
-	push dx
-	mov ah,86h
-	mov cx,0000h
-	mov dx,2710h
-	int 15h
-	pop dx
-
 	;printbar
 	mov ah,9h
-	mov cx,1
+	mov cx,71
 	mov bl,33h
 	mov al,3h
 	int 10h	
-	inc barx
-	cmp barx , 46h
-	jle printbar
-
 printheart:
-	mov dl ,barx
-	mov dh ,bary
-  ;cursor
-	mov ah, 2h
-	int 10h
-	push dx
-	mov ah,86h
-	mov cx,0000h
-	mov dx,2710h
-	int 15h
-	pop dx
+ 	mov dl , 47h
+ 	mov dh ,bary
+   ;cursor
+ 	mov ah, 2h
+ 	int 10h
 	;printheart
 	mov ah,9h
-	mov cx,1
+	mov cx,9
 	mov bl,3Ch
 	mov al,3h
 	int 10h
-	inc barx
-	cmp barx , 4Fh
-	jle printheart
 
 printrocket:	
 	;printrocket
 	call print
 	mov shooty , 16h
+	dec posx
+	mov dl , posx
+	mov shootx , dl
+	inc posx
 key:
 	;readkey
 	mov ah,00h
@@ -89,10 +71,14 @@ key:
 	je printleft
 
 	cmp ax,4800h		;up
-	je shootbullet
+	je shootbulletsound
 
 	jmp printrocket
-
+rocket:
+	mov dl , posx
+	sub dl , 2
+	mov posx , dl
+	jmp printrocket	
 printleft:
 	cmp posx,2h
 	je key
@@ -133,33 +119,53 @@ printright:
 
 preexit:
 	jmp exit
+shootbulletsound:
+	;sound
+	mov     al, 182         ; meaning that we're about to load
+    out     43h, al         ; a new countdown value
 
+    mov     ax, 2153        ; countdown value is stored in ax. It is calculated by 
+                            ; dividing 1193180 by the desired frequency (with the
+                            ; number being the frequency at which the main system
+                            ; oscillator runs
+    out     42h, al         ; Output low byte.
+    mov     al, ah          ; Output high byte.
+    out     42h, al               
+
+    in      al, 61h         
+                            	   ; to connect the speaker to timer 2
+    or      al, 00000011b  
+    out     61h, al         	   ; Send the new value
 shootbullet:
-  cmp shooty , 0h
-  jl printrocket
-  ;cursor delay
-  mov dh,shooty
-  mov ah, 2h
-  int 10h
-  ;printbullet
-  mov ah,9h
-  mov cx,1
-  mov bl,0eh
-  mov al,23
-  int 10h
+	cmp shooty , 0h
+	jl rocket
 
-  push dx
-  mov ah,86h
-  mov cx,0000h
-  mov dx,2710h
-  int 15h
-  pop dx
-  ;clearbullet
-  mov ah,9h
-  mov cx,1
-  mov bl,0h
-  mov al,23
+	;cursor delay
+	mov dh,shooty
+	mov ah, 2h
+	int 10h
+	;printbullet
+	mov ah,9h
+	mov cx,1
+	mov bl,0eh
+	mov al,23
+	int 10h
+
+	push dx
+	mov ah,86h
+	mov cx,0000h
+	mov dx,2710h
+	int 15h
+	pop dx
+	;clearbullet
+	mov ah,9h
+	mov cx,1
+	mov bl,0h
+	mov al,23
 	int 10h	
+	;mute
+	and      al, 00000000b  
+	out     61h, al         	   ; Send the new value
 
 	dec shooty
 	jmp shootbullet
