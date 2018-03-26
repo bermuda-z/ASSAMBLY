@@ -13,14 +13,20 @@ main:
 	mov al , 3h
 	int 10h
 
-randompos:
+input:
 	;readkey
-	mov ah , 0h
-	int 16h			
+	mov ah , 1h
+	int 16h	
+
+	jz randompos	
 
 	cmp al,27		;exit
 	je exit1
 
+	xor ax,ax
+	int 16h
+
+randompos:
 	;read system time
 	mov ah , 0h
 	int 1Ah
@@ -33,51 +39,60 @@ randompos:
 	mov matx , dl
 	mov maty , 0h
 
-
 printrandchar:
-	call randchar     ;randchar
-
-	mov dl , matx
+	;white
+	call randchar     ;randchar	
 	mov dh , maty
-	mov bl,0fh	
+	mov bl,0fh
 	call printchar
 
-	;y-7
+
 	mov dl,maty
 	mov taily,dl
-	sub taily , 2
+	sub taily , 1
 
-	inc maty
-
-	mov bl , 07h
-	mov dl , matx
+	;lightgreen
+	call randchar     ;randchar
 	mov dh , taily
-	;cursor
- 	mov ah, 2h
- 	int 10h
-	;printblack
-	mov ah,9h
-	mov cx,1
-	mov al,char
-	int 10h
-
-	cmp maty,25
-	je randompos
-	
-	jmp printrandchar
+	mov bl , 0Ah
+	call printchar
+	jmp printcolor
 exit1:
 	jmp exit
+input1:
+	jmp input	
+printcolor:
 
-darkgrey:
-	mov bl , 08h
-
-lightgreen:
-	mov bl , 0Fh
-
-darkgreen:
+	;Darkgreen
+	call randchar     ;randchar
+	sub taily , 2
+	mov dh , taily
 	mov bl , 02h
+	call printchar
+
+	;Darkgrey
+	call randchar     ;randchar
+	sub taily , 1
+	mov dh , taily
+	mov bl , 08h
+	call printchar
+
+	;black
+	call randchar     ;randchar
+	sub taily , 1
+	mov dh , taily
+	mov bl , 0h
+	call printchar
+
+	inc maty
+	cmp maty,30
+	je input1
+	
+	jmp printrandchar
 
 printchar:
+	
+	mov dl , matx
 	;cursor
  	mov ah, 2h
  	int 10h
@@ -103,12 +118,6 @@ randchar:
 	mov char , dl 
 	ret	
 exit:
-	mov ah,6h
-	mov al,0h		; clear whole screen
-	mov bh,7h
-	mov cx,0h
-	mov dx,184fh
-	int 10h
 	
 	ret
 	end main
