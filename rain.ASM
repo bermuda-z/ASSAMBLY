@@ -1,4 +1,4 @@
-	.model tiny
+.model tiny
         .data
 matx	db 		0
 maty	db		0
@@ -38,51 +38,35 @@ printrandchar:
 	call randchar     ;randchar
 
 	mov dl , matx
-	mov dh , maty	
-	;cursor
- 	mov ah, 2h
- 	int 10h
-
-	;printrandchar
-	mov ah,9h
-	mov cx,1
-	mov bl,7h
-	mov al,char
-	int 10h
+	mov dh , maty
+	mov bl,0fh	
+	call printchar
 
 	;y-7
 	mov dl,maty
 	mov taily,dl
-	sub taily , 7
-
-	cmp taily , 0
+	sub taily , 2
 
 	inc maty
 
+	mov bl , 07h
 	mov dl , matx
 	mov dh , taily
 	;cursor
  	mov ah, 2h
  	int 10h
-
 	;printblack
 	mov ah,9h
 	mov cx,1
-	mov bl,0h
 	mov al,char
 	int 10h
 
-	cmp maty,32
+	cmp maty,25
 	je randompos
 	
 	jmp printrandchar
 exit1:
 	jmp exit
-white:
-	mov bl , 0Fh
-
-lightgrey:
-	mov bl , 07h
 
 darkgrey:
 	mov bl , 08h
@@ -93,9 +77,16 @@ lightgreen:
 darkgreen:
 	mov bl , 02h
 
-black:
-	mov bl , 0h
-
+printchar:
+	;cursor
+ 	mov ah, 2h
+ 	int 10h
+	;print
+	mov ah,9h
+	mov cx,1
+	mov al,char
+	int 10h
+	ret
 randchar:
 	;read system time
 	mov ah , 0h
@@ -111,6 +102,13 @@ randchar:
 
 	mov char , dl 
 	ret	
-exit:	
+exit:
+	mov ah,6h
+	mov al,0h		; clear whole screen
+	mov bh,7h
+	mov cx,0h
+	mov dx,184fh
+	int 10h
+	
 	ret
 	end main
