@@ -1,4 +1,4 @@
-        .model  tiny
+   .model  tiny
         .data
 posx   db      0
 posy   db      0
@@ -6,13 +6,106 @@ barx   db      0
 bary   db      0
 shootx   db      0
 shooty   db      0
+i db 0
+line_1S db''
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '     _    _  _____ _____ __   _____ _   _      _____ _____  _   _  _____        '
+db '     | \ / | |   |   |  |  \    |    \ /       |     |   | | \ / | |            '
+db '     |     | |___|   |  |__/    |     \        |  __ |___| |     | |____        '
+db '     |     | |   |   |  |  \    |    / \       |   | |   | |     | |            '
+db '     |     | |   |   |  |   \ __|__ /   \____  |___| |   | |     | |____        '
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '    ======================================================================      '
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '                         Press >>> Start (Enter)                                '
+db '                                                                                '
+db '                           Press >>  Exit (ESC)                                 '
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '                                                                                '
+db '                                                                               $'
+
+
+GameOver_S db ''
+db '********************************************************************************'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*      _________________________________________________________________       *'
+db '*     |   _____  ____  _    _  ______     ______  _     _ _____  __     |      *'
+db '*     |  |       |   | | \ / | |         |      |  |   /  |     |  \    |      *'
+db '*     |  |    __ |___| |     | |_____    |      |  |  /   |____ |__/    |      *'
+db '*     |  |     | |   | |     | |         |      |  | /    |     |  \    |      *'
+db '*     |  |_____| |   | |     | |_____    |______|  |/     |____ |   \   |      *'
+db '*     |_________________________________________________________________|      *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                             SCORE :                                          *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*                                                                              *'
+db '*     PLAY AGAIN (Enter)                                      EXIT (ESC)       *'
+db '*                                                                              *'
+db '*******************************************************************************'
+
+
         .code
         org     0100h
 main:
 	mov ah ,0h		;text mode
 	mov al ,3h
 	int 10h
+StartP:
 
+    mov bh , 0h ; get cursor
+    mov ah,3h
+
+    mov ax,cs ; set es
+    mov es,ax
+
+    mov dl,0
+    mov dh,4
+    mov ah,0
+
+    mov bp,offset line_1S
+    mov bl,12
+    mov al,1
+    mov cx,1999
+
+    mov ah,13h
+    int 10h
+
+    mov ah,00h
+	int 16h			;read key
+
+	cmp al,27		;exit
+	je prepreexit
+
+    cmp al,13		;enter
+	je prestartgame
+prestartgame:
+	mov ah,6h
+	mov al,0h		; clear whole screen
+	mov bh,7h
+	mov cx,0h
+	mov dx,184fh
+	int 10h	
+startgame:
 	mov dh , 17h ;y
 	mov dl , 28h ;x
 	mov bh , 0h
@@ -47,7 +140,6 @@ printheart:
 	mov bl,3Ch
 	mov al,3h
 	int 10h
-
 printrocket:	
 	;printrocket
 	call print
@@ -56,6 +148,9 @@ printrocket:
 	mov dl , posx
 	mov shootx , dl
 	inc posx
+	jmp key
+prepreexit:
+	jmp preexit		
 key:
 	;readkey
 	mov ah,00h
