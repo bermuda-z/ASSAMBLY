@@ -1,4 +1,4 @@
-   .model  tiny
+  .model  tiny
         .data
 posx   db      0
 posy   db      0
@@ -63,7 +63,39 @@ db '*     PLAY AGAIN (Enter)                                      EXIT (ESC)    
 db '*                                                                              *'
 db '*******************************************************************************'
 
+SomeTune       dw 41, 20  ;E    ;ความถี่-เวลา
+				dw 1920,200
+				dw 2150,200
+				dw 1920,450
 
+				dw 2180,200
+				dw 2480,200
+				dw 2180,450
+
+				dw 2390,200
+				dw 2620,200
+				dw 2390,450
+
+				dw 3100,200
+				dw 3400,200
+				dw 3100,1500
+
+				dw 1700,100
+				dw 1650,1
+				dw 1700,100
+				dw 1650,1
+				dw 1700,100
+				dw 1650,1
+				dw 1700,100
+
+				dw 2100,10
+
+				dw 2050,200
+				dw 2400,200
+				dw 2100,600
+
+
+				dw  00h,00h
         .code
         org     0100h
 main:
@@ -90,6 +122,21 @@ StartP:
     mov ah,13h
     int 10h
 
+	mov   si, offset SomeTune      ; play opening sound
+    call  speakerOn              ; turn speaker on
+
+LoopIt:
+          lodsw                        ; get freq
+          or    ax, ax                 ; if freq. = 0 then done
+          jz    LDone
+          call  freqOut
+          lodsw                        ; get duration
+          mov   cx, ax
+          call  PauseIt
+          jmp  short LoopIt
+
+LDone:
+    call  speakerOff             ; turn speaker off
     mov ah,00h
 	int 16h			;read key
 
@@ -115,7 +162,6 @@ startgame:
 
 	mov barx , 0h               ;bar
 	mov bary , 18h               ;bar
-
 printbar:
 	mov dl ,0h
 	mov dh ,bary
@@ -304,6 +350,51 @@ print:
 	int 10h
 
 	ret
+speakerOn:
+          in    al, 61h
+          or    al, 03h
+          out   61h, al
+          mov   al, 0B6h
+          out   43h, al
+          ret
+
+speakerOff:
+          in    al, 61h
+          and   al, 0FCh
+          out   61h, al
+          ret
+
+freqOut:
+          mov   dx, 42h                  ; port to out
+          out   dx, al                   ; out low order
+          xchg  ah, al
+          out   dx, al
+          ret
+
+PauseIt proc
+          mov   ax, 0040h
+          mov   es, ax
+
+          ; wait for it to change the first time
+          mov   al, es:[006Ch]
+@a:
+          cmp   al, es:[006Ch]
+          je   short @a
+
+        ; wait for it to change again
+loop_it:
+          mov   al, es:[006Ch]
+
+@b:
+          cmp   al, es:[006Ch]
+          je   short @b
+
+          sub  cx, 110
+          jns  short loop_it
+
+          ret
+
+PauseIt endp	
 exit:
 	mov ah,6h
 	mov al,0h		; clear whole screen
